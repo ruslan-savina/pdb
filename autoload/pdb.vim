@@ -46,9 +46,9 @@ func! pdb#GetRunCurrentScriptCmd()
 endfunc
 
 func! pdb#GetRunCurrentDjangoScriptCmd()
-    items = pdb#GetPythonCmdItems() + s:django_run_script_cmd_items
+    let items = pdb#GetPythonCmdItems() + s:django_run_script_cmd_items
     if !empty(g:pdb_django_settings)
-        items += ['--settings', g:pdb_django_settings]
+        let items += ['--settings', g:pdb_django_settings]
     endif
     call add(items, pdb#GetCurrentDjangoScriptName())
     return pdb#GetCmd(items)
