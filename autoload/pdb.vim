@@ -1,5 +1,6 @@
 let s:python_cmd_items = ['python', '-m', g:pdb_module_name]
 let s:django_run_script_cmd_items = ['manage.py', 'runscript']
+let s:django_run_server_cmd_items = ['manage.py', 'runserver']
 
 func! pdb#GetWorkingDirrectoryName()
     return fnamemodify(getcwd(), ':t')
@@ -51,5 +52,17 @@ func! pdb#GetRunCurrentDjangoScriptCmd()
         call add(items, '--settings=' . g:pdb_django_settings)
     endif
     call add(items, pdb#GetCurrentDjangoScriptName())
+    return pdb#GetCmd(items)
+endfunc
+
+func! pdb#GetRunDjangoServerCmd()
+    let items = pdb#GetPythonCmdItems() + s:django_run_server_cmd_items
+    if !empty(g:pdb_django_settings)
+        call add(items, '--settings=' . g:pdb_django_settings)
+    endif
+    if !empty(g:pdb_django_server_args)
+        let items += g:pdb_django_server_args
+    endif
+    call add(items, printf('%s:%s', g:pdb_django_server_addr, g:pdb_django_server_port))
     return pdb#GetCmd(items)
 endfunc
