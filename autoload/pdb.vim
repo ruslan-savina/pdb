@@ -1,4 +1,5 @@
-let s:python_cmd_args = ['python', '-m', g:pdb_module_name]
+let s:python_cmd_items = ['python', '-m', g:pdb_module_name]
+let s:django_run_script_cmd_items = ['manage.py', 'runscript']
 
 func! pdb#GetWorkingDirrectoryName()
     return fnamemodify(getcwd(), ':t')
@@ -37,9 +38,18 @@ func! pdb#GetCmd(items)
 endfunc
 
 func! pdb#GetPythonCmdItems()
-    return s:python_cmd_args + pdb#GetBreakpointCmdItems()
+    return s:python_cmd_items + pdb#GetBreakpointCmdItems()
 endfunc
 
 func! pdb#GetRunCurrentScriptCmd()
     return pdb#GetCmd(add(pdb#GetPythonCmdItems(), pdb#GetCurrentFileName()))
+endfunc
+
+func! pdb#GetRunCurrentDjangoScriptCmd()
+    items = pdb#GetPythonCmdItems() + s:django_run_script_cmd_items
+    if !empty(g:pdb_django_settings)
+        items += ['--settings', g:pdb_django_settings]
+    endif
+    call add(items, pdb#GetCurrentDjangoScriptName())
+    return pdb#GetCmd(items)
 endfunc
