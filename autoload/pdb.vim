@@ -1,6 +1,32 @@
 let s:python_cmd_items = ['python', '-m', g:pdb_module_name]
 let s:django_run_script_cmd_items = ['manage.py', 'runscript']
 let s:django_run_server_cmd_items = ['manage.py', 'runserver']
+let s:docker_ps_filter_cmd_items = ['docker', 'ps', '-q', '--filter']
+let s:docker_exec_it_cmd_items = ['docker', 'exec', '-it']
+
+func! s:term_execute(cmd, split, name)
+    if g:pdb_write_debug_log
+        echom a:cmd
+    endif
+    execute(empty(a:mode) ? 'vsp' : a:split)
+    execute('term ' . a:cmd)
+    execute('file ' . s:get_option('pdb_debugger', 'pdb') . ': ' . a:name . ' ' . bufnr())
+    redraw
+endfunc
+
+func! s:system(cmd)
+    if g:pdb_write_debug_log
+        echom a:cmd
+    endif
+    return trim(system(a:cmd))
+endfunc
+
+func s:get_docker_container_id()
+    let container_name = pdb#GetDockerContainerName()
+    let items = add(s:docker_ps_filter_cmd_items, printf('name=%s', container_name))
+    let cmd = s:get_cmd(items)
+    return s:system(cmd)
+endfunc
 
 func! s:get_working_dirrectory_name()
     return fnamemodify(getcwd(), ':t')
@@ -81,4 +107,8 @@ endfunc
 func! pdb#GetDjangoRunServerCmd()
     let items = s:get_django_run_server_cmd_items()
     return s:get_cmd(items)
+endfunc
+
+func! Test()
+    return s:get_docker_container_id()
 endfunc
