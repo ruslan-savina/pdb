@@ -17,7 +17,7 @@ func! pdb#GetCurrentDjangoScriptName()
 endfunc
 
 func! pdb#GetBreakpoint(file_name, line_number)
-    let file_name = empty(a:file_name) ? s:pdb#GetCurrentFileName() : a:file_name
+    let file_name = empty(a:file_name) ? pdb#GetCurrentFileName() : a:file_name
     let line_number = empty(a:line_number) ? line('.') : a:line_number
     return 'b ' . file_name . ':' . line_number
 endfunc
@@ -41,5 +41,5 @@ func! pdb#GetPythonCmdItems()
 endfunc
 
 func! pdb#GetRunCurrentScriptCmd()
-    return pdb#GetCmd(add(pdb#GetPythonCmdItems(), s:pdb#GetCurrentFileName()))
+    return pdb#GetCmd(add(pdb#GetPythonCmdItems(), pdb#GetCurrentFileName()))
 endfunc
