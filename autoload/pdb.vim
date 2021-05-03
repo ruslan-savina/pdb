@@ -23,7 +23,7 @@ endfunc
 
 func s:get_docker_container_id()
     let container_name = pdb#GetDockerContainerName()
-    let items = add(s:docker_ps_filter_cmd_items, printf('name=%s', container_name))
+    let items = add(copy(s:docker_ps_filter_cmd_items), printf('name=%s', container_name))
     let cmd = s:get_cmd(items)
     return s:system(cmd)
 endfunc
@@ -65,7 +65,7 @@ func! s:get_python_breakpoints_cmd_items()
 endfunc
 
 func! s:get_run_current_script_cmd_items()
-    let results = add(s:get_python_breakpoints_cmd_items(), s:get_current_file_name())
+    let results = add(copy(s:get_python_breakpoints_cmd_items()), s:get_current_file_name())
     return results
 endfunc
 
