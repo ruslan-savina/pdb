@@ -8,7 +8,7 @@ func! pdb#GetDockerContainerName()
     return printf('%s_%s', pdb#GetWorkingDirrectoryName(), g:pdb_module_name)
 endfunc
 
-func! db#GetCurrentFileName()
+func! pdb#GetCurrentFileName()
     return fnamemodify(expand("%"), ":~:.")
 endfunc
 
