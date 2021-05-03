@@ -20,6 +20,10 @@ func! s:get_breakpoint(file_name, line_number)
     return 'b ' . file_name . ':' . line_number
 endfunc
 
+func! s:get_cmd(items)
+    return join(filter(a:items, '!empty(v:val)'))
+endfunc
+
 func! s:get_breakpoint_cmd_items()
     let results = []
     for [file_name, line_numbers] in items(g:breakpoints_data)
@@ -30,12 +34,34 @@ func! s:get_breakpoint_cmd_items()
     return results
 endfunc
 
-func! s:get_cmd(items)
-    return join(filter(a:items, '!empty(v:val)'))
+func! s:get_python_breakpoints_cmd_items()
+    return s:python_cmd_items + s:get_breakpoint_cmd_items()
 endfunc
 
-func! s:get_python_cmd_items()
-    return s:python_cmd_items + s:get_breakpoint_cmd_items()
+func! s:get_run_current_script_cmd_items()
+    let results = add(s:get_python_breakpoints_cmd_items(), s:get_current_file_name())
+    return results
+endfunc
+
+func! s:get_run_current_django_script_cmd_items()
+    let results = s:get_python_breakpoints_cmd_items() + s:django_run_script_cmd_items
+    if !empty(g:pdb_django_settings)
+        call add(results, '--settings=' . g:pdb_django_settings)
+    endif
+    call add(results, s:get_current_django_script_name())
+    return results
+endfunc
+
+func! s:get_django_run_server_cmd_items()
+    let results = s:get_python_breakpoints_cmd_items() + s:django_run_server_cmd_items
+    if !empty(g:pdb_django_settings)
+        call add(results, '--settings=' . g:pdb_django_settings)
+    endif
+    if !empty(g:pdb_django_server_args)
+        let results += g:pdb_django_server_args
+    endif
+    call add(results, printf('%s:%s', g:pdb_django_server_addr, g:pdb_django_server_port))
+    return results
 endfunc
 
 func! pdb#GetDockerContainerName()
@@ -43,26 +69,16 @@ func! pdb#GetDockerContainerName()
 endfunc
 
 func! pdb#GetRunCurrentScriptCmd()
-    return s:get_cmd(add(s:get_python_cmd_items(), s:get_current_file_name()))
+    let items = s:get_run_current_script_cmd_items()
+    return s:get_cmd(items)
 endfunc
 
 func! pdb#GetRunCurrentDjangoScriptCmd()
-    let items = s:get_python_cmd_items() + s:django_run_script_cmd_items
-    if !empty(g:pdb_django_settings)
-        call add(items, '--settings=' . g:pdb_django_settings)
-    endif
-    call add(items, s:get_current_django_script_name())
+    let items = s:get_run_current_django_script_cmd_items()
     return s:get_cmd(items)
 endfunc
 
 func! pdb#GetDjangoRunServerCmd()
-    let items = s:get_python_cmd_items() + s:django_run_server_cmd_items
-    if !empty(g:pdb_django_settings)
-        call add(items, '--settings=' . g:pdb_django_settings)
-    endif
-    if !empty(g:pdb_django_server_args)
-        let items += g:pdb_django_server_args
-    endif
-    call add(items, printf('%s:%s', g:pdb_django_server_addr, g:pdb_django_server_port))
+    let items = s:get_django_run_server_cmd_items()
     return s:get_cmd(items)
 endfunc
