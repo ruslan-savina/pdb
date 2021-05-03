@@ -1,8 +1,29 @@
+func! s:get_working_dirrectory_name()
+    return fnamemodify(getcwd(), ':t')
+endfunc
+
+func! pdb#GetDockerContainerName()
+    return printf('%s_%s', s:get_working_dirrectory_name(), g:pdb_module_name)
+endfunc
+
 let s:python_cmd_items = ['python', '-m', g:pdb_module_name]
 let s:django_run_script_cmd_items = ['manage.py', 'runscript']
 let s:django_run_server_cmd_items = ['manage.py', 'runserver']
-let s:docker_ps_filter_cmd_items = ['docker', 'ps', '-q', '--filter']
-let s:docker_exec_it_cmd_items = ['docker', 'exec', '-it']
+
+if !empty(g:pdb_docker_compose_file) && !empty(g:pdb_docker_compose_service_name)
+    let s:docker_rm_items = ['docker', 'rm', '-f', pdb#GetDockerContainerName()]
+    let s:docker_ps_filter_cmd_items = [
+    \   'docker', 'ps', '-q', '--filter', printf('name=%s', pdb#GetDockerContainerName())
+    \]
+    let s:docker_exec_it_cmd_items = ['docker', 'exec', '-it']
+    let s:docker_compose_run_cmd_items = [
+    \   'docker-compose', 
+    \   printf('--file=%s', g:pdb_docker_compose_file), 
+    \   'run', '-d', '--service-ports', '--use-aliases', 
+    \   printf('--name=%s', pdb#GetDockerContainerName()),
+    \   g:pdb_docker_compose_service_name, 'bash'
+    \]
+endif
 
 func! s:term_execute(cmd, split, name)
     if g:pdb_write_debug_log
@@ -22,14 +43,8 @@ func! s:system(cmd)
 endfunc
 
 func s:get_docker_container_id()
-    let container_name = pdb#GetDockerContainerName()
-    let items = add(copy(s:docker_ps_filter_cmd_items), printf('name=%s', container_name))
-    let cmd = s:get_cmd(items)
+    let cmd = s:get_cmd(s:docker_ps_filter_cmd_items)
     return s:system(cmd)
-endfunc
-
-func! s:get_working_dirrectory_name()
-    return fnamemodify(getcwd(), ':t')
 endfunc
 
 func! s:get_current_file_name()
@@ -46,8 +61,8 @@ func! s:get_breakpoint(file_name, line_number)
     return 'b ' . file_name . ':' . line_number
 endfunc
 
-func! s:get_cmd(items)
-    return join(filter(a:items, '!empty(v:val)'))
+func! s:get_cmd(cmd_items)
+    return join(filter(a:cmd_items, '!empty(v:val)'))
 endfunc
 
 func! s:get_breakpoint_cmd_items()
@@ -90,25 +105,39 @@ func! s:get_django_run_server_cmd_items()
     return results
 endfunc
 
-func! pdb#GetDockerContainerName()
-    return printf('%s_%s', s:get_working_dirrectory_name(), g:pdb_module_name)
+func! s:docker_rm_contaner()
+    let cmd = s:get_cmd(s:docker_rm_items)
+    call s:system(cmd)
+endfunc
+
+func! s:docker_compose_run()
+    let result = s:get_docker_container_id()
+    if !empty(result)
+        return result
+    endif
+
+    call s:docker_rm_contaner()
+    let cmd = s:get_cmd(s:docker_compose_run_cmd_items)
+    if !empty(g:pdb_docker_compose_wrapper_cmd)
+        let cmd = printf('%s -- %s', g:pdb_docker_compose_wrapper_cmd, cmd)
+    endif
+    call s:system(cmd)
+
+    let result = s:get_docker_container_id()
+    return result
 endfunc
 
 func! pdb#GetRunCurrentScriptCmd()
-    let items = s:get_run_current_script_cmd_items()
-    return s:get_cmd(items)
+    let cmd_items = s:get_run_current_script_cmd_items()
+    return s:get_cmd(cmd_items)
 endfunc
 
 func! pdb#GetRunCurrentDjangoScriptCmd()
-    let items = s:get_run_current_django_script_cmd_items()
-    return s:get_cmd(items)
+    let cmd_items = s:get_run_current_django_script_cmd_items()
+    return s:get_cmd(cmd_items)
 endfunc
 
 func! pdb#GetDjangoRunServerCmd()
-    let items = s:get_django_run_server_cmd_items()
-    return s:get_cmd(items)
-endfunc
-
-func! Test()
-    return s:get_docker_container_id()
+    let cmd_items = s:get_django_run_server_cmd_items()
+    return s:get_cmd(cmd_items)
 endfunc
