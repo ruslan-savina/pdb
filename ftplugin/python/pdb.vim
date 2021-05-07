@@ -11,4 +11,4 @@ let g:pdb_django_server_args = get(g:, 'pdb_django_server_args', ['--noreload', 
 let g:pdb_docker_compose_service_name = get(g:, 'pdb_docker_compose_service_name', v:null)
 let g:pdb_docker_compose_file = get(g:, 'pdb_docker_compose_file', v:null)
 let g:pdb_docker_compose_wrapper_cmd = get(g:, 'pdb_docker_compose_wrapper_cmd', v:null)
-let g:pdb_docker_container_name = get(g:, 'pdb_docker_container_name', pdb#GetDockerContainerName())
+let g:pdb_docker_container_name = get(g:, 'pdb_docker_container_name', common#GetDockerContainerName())

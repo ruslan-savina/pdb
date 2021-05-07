@@ -23,10 +23,6 @@ func! s:get_current_file_name()
     return expand('%:t')
 endfunc
 
-func! s:get_working_dirrectory_name()
-    return fnamemodify(getcwd(), ':t')
-endfunc
-
 func! s:get_current_django_script_name()
     return join(split(expand('%:r'), '/'), '.')
 endfunc
@@ -38,13 +34,13 @@ endfunc
 func s:docker_get_container_id()
     let cmd = printf(
     \   'docker ps -q --filter name=%s', 
-    \   pdb#GetDockerContainerName()
+    \   common#GetDockerContainerName()
     \)
     return s:system(cmd)
 endfunc
 
 func! s:docker_rm_contaner()
-    let cmd = printf('docker rm -f %s', pdb#GetDockerContainerName())
+    let cmd = printf('docker rm -f %s', common#GetDockerContainerName())
     call s:system(cmd)
 endfunc
 
@@ -52,7 +48,7 @@ func! s:docker_compose_run()
     let cmd = printf(
     \   'docker-compose --file=%s run -d --service-ports --use-aliases --name=%s %s bash',
     \   g:pdb_docker_compose_file, 
-    \   pdb#GetDockerContainerName(),
+    \   common#GetDockerContainerName(),
     \   g:pdb_docker_compose_service_name
     \)
     if !empty(g:pdb_docker_compose_wrapper_cmd)
@@ -162,10 +158,6 @@ func! s:get_docker_django_kill_server_cmd()
 endfunc
 
 " Public functions
-func! pdb#GetDockerContainerName()
-    return printf('%s_%s', s:get_working_dirrectory_name(), g:pdb_module_name)
-endfunc
-
 func! pdb#DebugScript()
     let cmd = s:get_script_cmd()
     call s:term_execute(cmd, g:pdb_debug_script_split_cmd, s:get_current_file_name())
