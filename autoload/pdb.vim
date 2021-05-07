@@ -1,10 +1,10 @@
-func! s:term_execute(cmd, split, name)
+func! s:term_execute(cmd, split_cmd, buffer_name)
     if g:pdb_write_debug_log
         echom a:cmd
     endif
-    execute(empty(a:mode) ? 'vsp' : a:split)
+    execute(a:split_cmd)
     execute('term ' . a:cmd)
-    execute('file ' . s:get_option('pdb_debugger', 'pdb') . ': ' . a:name . ' ' . bufnr())
+    execute('file ' . g:pdb_module_name . ': ' . a:buffer_name . ' ' . bufnr())
     redraw
 endfunc
 
@@ -15,8 +15,12 @@ func! s:system(cmd)
     return trim(system(a:cmd))
 endfunc
 
-func! s:get_current_file_name()
+func! s:get_current_file_path()
     return fnamemodify(expand("%"), ":~:.")
+endfunc
+
+func! s:get_current_file_name()
+    return expand('%:t')
 endfunc
 
 func! s:get_working_dirrectory_name()
@@ -106,7 +110,7 @@ func! s:get_django_args_cmd()
 endfunc
 
 func! s:get_script_cmd()
-    return printf('%s %s', s:get_base_cmd(), s:get_current_file_name())
+    return printf('%s %s', s:get_base_cmd(), s:get_current_file_path())
 endfunc
 
 func! s:get_django_script_cmd()
@@ -149,31 +153,47 @@ func! s:get_docker_django_server_cmd()
     return printf('%s %s', s:get_docker_exec_it_cmd(), s:get_django_server_cmd())
 endfunc
 
+func! s:get_django_kill_server_cmd()
+    return 'pkill -9 -f "manage.py runserver"'
+endfunc
+
+func! s:get_docker_django_kill_server_cmd()
+    return printf('%s %s', s:get_docker_exec_it_cmd(), s:get_django_kill_server_cmd())
+endfunc
+
 " Public functions
 func! pdb#GetDockerContainerName()
     return printf('%s_%s', s:get_working_dirrectory_name(), g:pdb_module_name)
 endfunc
 
 func! pdb#DebugScript()
-    echo s:get_script_cmd()
+    let cmd = s:get_script_cmd()
+    call s:term_execute(cmd, g:pdb_debug_script_split_cmd, s:get_current_file_name())
 endfunc
 
 func! pdb#DebugDjangoScript()
-    echo s:get_django_script_cmd()
+    let cmd = s:get_django_script_cmd()
+    call s:term_execute(cmd, g:pdb_debug_script_split_cmd, s:get_current_file_name())
 endfunc
 
 func! pdb#DebugDjangoServer()
-    echo s:get_django_server_cmd()
+    call s:system(s:get_django_kill_server_cmd())
+    let cmd = s:get_django_server_cmd()
+    call s:term_execute(cmd, g:pdb_debug_django_server_split_cmd, 'django runserver')
 endfunc
 
 func! pdb#DebugDockerScript()
-    echo s:get_docker_script_cmd()
+    let cmd = s:get_docker_script_cmd()
+    call s:term_execute(cmd, g:pdb_debug_script_split_cmd, s:get_current_file_name())
 endfunc
 
 func! pdb#DebugDockerDjangoScript()
-    echo s:get_docker_django_script_cmd()
+    let cmd = s:get_docker_django_script_cmd()
+    call s:term_execute(cmd, g:pdb_debug_script_split_cmd, s:get_current_file_name())
 endfunc
 
 func! pdb#DebugDockerDjangoServer()
-    return s:get_docker_django_server_cmd()
+    call s:system(s:get_docker_django_kill_server_cmd())
+    let cmd = s:get_docker_django_server_cmd()
+    call s:term_execute(cmd, g:pdb_debug_django_server_split_cmd, 'django runserver')
 endfunc
