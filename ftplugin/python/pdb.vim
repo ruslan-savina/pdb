@@ -38,6 +38,6 @@ endif
 
 augroup pdb_breakpoints
     autocmd!
-    autocmd BufRead * call pdb#breakpoints#load()
-    autocmd BufWrite * call pdb#breakpoints#save()
+    autocmd BufRead FileType python call pdb#breakpoints#load()
+    autocmd BufWrite FileType python call pdb#breakpoints#save()
 augroup END
