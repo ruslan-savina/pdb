@@ -1,1 +1,0 @@
-highlight Breakpoint guifg=red

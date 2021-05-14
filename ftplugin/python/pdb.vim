@@ -19,3 +19,12 @@ command! DebugDjangoServer call pdb#DebugDjangoServer()
 command! DebugDockerScript call pdb#DebugDockerScript()
 command! DebugDockerDjangoScript call pdb#DebugDockerDjangoScript()
 command! DebugDockerDjangoServer call pdb#DebugDockerDjangoServer()
+
+func! s:hi()
+    hi Breakpoint guifg=red
+endfunc
+
+augroup pdb_colors
+    autocmd!
+    autocmd ColorScheme * call s:hi()
+augroup END
