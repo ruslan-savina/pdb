@@ -1,22 +1,5 @@
 let g:breakpoints_data = {}
 
-augroup pdb_breakpoints
-    autocmd!
-    autocmd BufRead * call s:buf_read()
-    autocmd BufWrite * call s:buf_write()
-augroup END
-
-function! s:buf_read()
-    let file_name = pdb#common#get_current_file_path()
-    call s:place_breakpoint_signs(file_name)
-endfunction
-
-function! s:buf_write()
-    let file_name = pdb#common#get_current_file_path()
-    call s:update_breakpoints_data(file_name)
-    call s:save_breakpoints_data()
-endfunction
-
 function! s:is_breakpoint_exists(file_name, line_number)
     return !empty(sign_getplaced(
     \   a:file_name, {'group': 'Breakpoint', 'lnum': a:line_number})[0].signs
@@ -148,6 +131,17 @@ endfunction
 function! pdb#breakpoints#list()
     call s:update_breakpoints_quickfix()
     copen
+endfunction
+
+function! pdb#breakpoints#load()
+    let file_name = pdb#common#get_current_file_path()
+    call s:place_breakpoint_signs(file_name)
+endfunction
+
+function! pdb#breakpoints#save()
+    let file_name = pdb#common#get_current_file_path()
+    call s:update_breakpoints_data(file_name)
+    call s:save_breakpoints_data()
 endfunction
 
 call s:load_breakpoints_data()

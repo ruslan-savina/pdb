@@ -36,3 +36,8 @@ if empty(sign_getdefined('Breakpoint'))
     sign define Breakpoint text=-> texthl=Breakpoint
 endif
 
+augroup pdb_breakpoints
+    autocmd!
+    autocmd BufRead * call pdb#breakpoints#load()
+    autocmd BufWrite * call pdb#breakpoints#save()
+augroup END
