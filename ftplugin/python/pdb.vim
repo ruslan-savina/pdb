@@ -36,7 +36,7 @@ if empty(sign_getdefined('Breakpoint'))
     sign define Breakpoint text=-> texthl=Breakpoint
 endif
 
-augroup pdb_breakpoints
+augroup pdb
     autocmd!
     autocmd BufRead FileType python call pdb#breakpoints#load()
     autocmd BufWrite FileType python call pdb#breakpoints#save()
