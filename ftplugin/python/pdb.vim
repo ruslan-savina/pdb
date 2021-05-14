@@ -41,3 +41,5 @@ augroup pdb_breakpoints
     autocmd BufRead FileType python call pdb#breakpoints#load()
     autocmd BufWrite FileType python call pdb#breakpoints#save()
 augroup END
+
+call pdb#breakpoints#load_data()

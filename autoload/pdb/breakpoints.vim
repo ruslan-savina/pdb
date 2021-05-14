@@ -73,15 +73,6 @@ function! s:save_breakpoints_data()
     \)
 endfun
 
-function! s:load_breakpoints_data()
-    if file_readable(g:pdb_breakpoints_file_name)
-        let lines = readfile(g:pdb_breakpoints_file_name)
-        if !empty(lines)
-            execute "let g:breakpoints_data = " . lines[0]
-        endif
-    endif
-endfun
-
 function! s:update_breakpoints_quickfix()
     let items = []
     for [file_name, line_numbers] in items(g:breakpoints_data)
@@ -133,6 +124,15 @@ function! pdb#breakpoints#list()
     copen
 endfunction
 
+function! pdb#breakpoints#load_data()
+    if file_readable(g:pdb_breakpoints_file_name)
+        let lines = readfile(g:pdb_breakpoints_file_name)
+        if !empty(lines)
+            execute "let g:breakpoints_data = " . lines[0]
+        endif
+    endif
+endfun
+
 function! pdb#breakpoints#load()
     let file_name = pdb#common#get_current_file_path()
     call s:place_breakpoint_signs(file_name)
@@ -143,5 +143,3 @@ function! pdb#breakpoints#save()
     call s:update_breakpoints_data(file_name)
     call s:save_breakpoints_data()
 endfunction
-
-call s:load_breakpoints_data()
