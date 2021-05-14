@@ -46,14 +46,12 @@ endfunc
 
 func! s:docker_compose_run()
     let cmd = printf(
-    \   'docker-compose --file=%s run -d --service-ports --use-aliases --name=%s %s bash',
+    \   '%s --file=%s run -d --service-ports --use-aliases --name=%s %s bash',
+    \   g:pdb_docker_compose_cmd,
     \   g:pdb_docker_compose_file, 
     \   common#GetDockerContainerName(),
     \   g:pdb_docker_compose_service_name
     \)
-    if !empty(g:pdb_docker_compose_wrapper_cmd)
-        let cmd = printf('%s -- %s', g:pdb_docker_compose_wrapper_cmd, cmd)
-    endif
     call s:system(cmd)
 endfunc
 
