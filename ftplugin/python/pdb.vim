@@ -1,4 +1,4 @@
-let g:pdb_breakpoints_file_name = '.breakpoints'
+let g:pdb_breakpoints_file_name = get(g:, 'pdb_breakpoints_file_name', '.breakpoints')
 let g:pdb_write_debug_log = get(g:, 'pdb_write_debug_log', v:false)
 let g:pdb_module_name = get(g:, 'pdb_module_name', 'pdb')
 let g:pdb_debug_script_split_cmd = get(g:, 'pdb_debug_script_split_cmd', 'vsp')
