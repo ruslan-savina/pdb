@@ -124,7 +124,7 @@ endfunction
 
 function! pdb#breakpoints#delete()
     let file_name = pdb#common#get_current_file_path()
-    call s:delete_breakpoint_sign(file_name)
+    call s:delete_breakpoint_sign(file_name, line('.'))
     call s:update_breakpoints_data(file_name)
     call s:update_breakpoints_quickfix()
     call s:save_breakpoints_data()
