@@ -1,5 +1,5 @@
 augroup pdb
     autocmd!
-    autocmd BufRead FileType python call pdb#breakpoints#load()
-    autocmd BufWrite FileType python call pdb#breakpoints#save()
+    autocmd BufRead *.py call pdb#breakpoints#load()
+    autocmd BufWrite *.py call pdb#breakpoints#save()
 augroup END
