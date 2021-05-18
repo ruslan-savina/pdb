@@ -9,7 +9,7 @@ endfunc
 
 func! s:sign_unplace(id, file_path)
     call sign_unplace(
-    \    'Breakpoint', {'buffer': a:file_path, 'id': a.id}
+    \    'Breakpoint', {'buffer': a:file_path, 'id': a:id}
     \)
 endfunc
 
@@ -17,21 +17,21 @@ func! s:sign_get_placed(file_path)
     return sign_getplaced(a:file_path, {'group': 'Breakpoint'})[0].signs
 endfunc
 
-func! s:breakpoint_new(file_path, line_number, condition)
+func! s:breakpoint_new(line_number, condition)
     let result = {
     \   'id': v:null,
-    \   'file_path': a:file_path,
     \   'line_number': a:line_number,
     \   'condition': a:condition,
     \}
     return result
+endfunc
 
-func! s:breakpoint_add(file_path, line_number, condition):
+func! s:breakpoint_add(file_path, line_number, condition)
     let breakpoints = get(g:breakpoints_data, a:file_path, [])
     if empty(breakpoints)
-        g:breakpoints_data[a:file_path] = breakpoints
+        let g:breakpoints_data[a:file_path] = breakpoints
     endif
-    let breakpoint = s:breakpoint_new(a:file_path, a:line_number, a:condition)
+    let breakpoint = s:breakpoint_new(a:line_number, a:condition)
     call add(breakpoints, breakpoint)
 endfunc
 
@@ -40,14 +40,14 @@ func! s:breakpoint_delete(file_path, line_number)
     if !empty(breakpoints)
         let breakpoint = get(
         \   filter(
-        \       a:breakpoints, 
+        \       breakpoints, 
         \       printf('v:val.line_number == %s', a:line_number)
         \   ), 0
         \)
         if !empty(breakpoint)
-            call remove(index(breakpoints, breakpoint))
+            call remove(breakpoints, index(breakpoints, breakpoint))
             if len(breakpoints) == 0
-                call remove(g:breakpoints_data, file_path)
+                call remove(g:breakpoints_data, a:file_path)
             endif
         endif
     endif
@@ -56,13 +56,15 @@ endfunc
 func! s:breakpoint_save_data()
     let data = {}
     for [file_path, breakpoints] in items(g:breakpoints_data)
+        let breakpoints_data = []
         for breakpoint in breakpoints
-            breakpoint_data = [breakpoint.line_number]
+            let breakpoint_data = [breakpoint.line_number]
             if !empty(breakpoint.condition)
                 call add(breakpoint_data, breakpoint.condition)
             endif
-            data[file_path] = breakpoint_data
+            call add(breakpoints_data, breakpoint_data)
         endfor
+        let data[file_path] = breakpoints_data
     endfor
     call writefile(
     \   [string(data)], g:pdb_breakpoints_file_name
@@ -88,7 +90,7 @@ func! s:breakpoint_load_data()
             if len(breakpoint_data) == 2
                 let condition = breakpoint_data[1]
             endif
-            let breakpoint = s:breakpoint_new(file_path, line_number, condition)
+            let breakpoint = s:breakpoint_new(line_number, condition)
             call add(breakpoints, breakpoint)
         endfor
     endfor
@@ -98,16 +100,16 @@ func! s:breakpoint_update_data(file_path)
     let lines_count = line('$')
     let signs = s:sign_get_placed(a:file_path)
     let breakpoint_ids = []
-    let breakpoints = g:breakpoints_data[a:file_path]
+    let breakpoints = get(g:breakpoints_data, a:file_path, [])
 
-    for breakpoint in breakpoints:
+    for breakpoint in breakpoints
         if empty(breakpoint.id)
-            breakpoint.id = s:sign_place(a:file_path, breakpoint.line_number)
+            let breakpoint.id = s:sign_place(a:file_path, breakpoint.line_number)
         endif
         call add(breakpoint_ids, breakpoint.id) 
     endfor
 
-    for sign in signs:
+    for sign in signs
         if sign.lnum > lines_count || index(breakpoint_ids, sign.id) == -1
             call s:sign_unplace(sign.id, a:file_path)
         else
@@ -115,12 +117,12 @@ func! s:breakpoint_update_data(file_path)
                 breakpoints, 
                 printf('v:val.id == %s', sign.id)
             )
-            breakpoint.line_number = sign.lnum
+            let breakpoint.line_number = sign.lnum
         endif
     endfor
 endfunc
 
-function! s:quickfix_update()
+func! s:quickfix_update()
     let items = []
     for [file_name, breakpoints] in items(g:breakpoints_data)
         for breakpoint in breakpoints
@@ -133,57 +135,57 @@ function! s:quickfix_update()
         endfor
     endfor
     call setqflist(items, 'r')
-endfunction
+endfunc
 
-function! pdb#breakpoints#add(condition)
+func! pdb#breakpoints#add(condition)
     let file_path = pdb#common#get_current_file_path()
     let current_line = line('.')
     call s:breakpoint_delete(file_path, current_line)
-    call s:breakpoint_add(file_path, current_line, condition)
+    call s:breakpoint_add(file_path, current_line, a:condition)
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
     call s:quickfix_update()
-endfunction
+endfunc
 
-function! pdb#breakpoints#delete()
-    let file_name = pdb#common#get_current_file_path()
+func! pdb#breakpoints#delete()
+    let file_path = pdb#common#get_current_file_path()
     call s:breakpoint_delete(file_path, line('.'))
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
     call s:quickfix_update()
-endfunction
+endfunc
 
-function! pdb#breakpoints#delete_in_file()
-    let file_name = pdb#common#get_current_file_path()
+func! pdb#breakpoints#delete_in_file()
+    let file_path = pdb#common#get_current_file_path()
     call remove(g:breakpoints_data, file_path)
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
     call s:quickfix_update()
-endfunction
+endfunc
 
-function! pdb#breakpoints#delete_all()
+func! pdb#breakpoints#delete_all()
     let g:breakpoints_data = {}
     call sign_unplace('Breakpoint')
     call s:breakpoint_save_data()
     call s:quickfix_update()
-endfunction
+endfunc
 
-function! pdb#breakpoints#list()
+func! pdb#breakpoints#list()
     call s:quickfix_update()
     copen
-endfunction
+endfunc
 
-function! pdb#breakpoints#init()
+func! pdb#breakpoints#init()
     call s:breakpoint_load_data()
-endfun
+endfunc
 
-function! pdb#breakpoints#buf_read()
+func! pdb#breakpoints#buf_read()
     let file_name = pdb#common#get_current_file_path()
     call s:breakpoint_update_data(file_path)
-endfunction
+endfunc
 
-function! pdb#breakpoints#buf_write()
+func! pdb#breakpoints#buf_write()
     let file_name = pdb#common#get_current_file_path()
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
-endfunction
+endfunc
