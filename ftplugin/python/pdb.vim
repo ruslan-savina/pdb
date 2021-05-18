@@ -22,6 +22,7 @@ command! PdbDebugDockerDjangoScript call pdb#debug#docker_django_script()
 command! PdbDebugDockerDjangoServer call pdb#debug#docker_django_server()
 
 command! PdbBreakpointAdd call pdb#breakpoints#add()
+command! -nargs=1 PdbBreakpointAddCondition call pdb#breakpoints#add(<f-args>)
 command! PdbBreakpointList call pdb#breakpoints#list()
 command! PdbBreakpointDelete call pdb#breakpoints#delete()
 command! PdbBreakpointDeleteInBuffer call pdb#breakpoints#delete_in_buffer()
@@ -36,4 +37,4 @@ if empty(sign_getdefined('Breakpoint'))
     sign define Breakpoint text=-> texthl=Breakpoint
 endif
 
-call pdb#breakpoints#load_data()
+call pdb#breakpoints#init()

@@ -23,8 +23,12 @@ func! s:get_current_django_script_name()
     return join(split(expand('%:r'), '/'), '.')
 endfunc
 
-func! s:get_breakpoint(file_name, line_number)
-    return printf('b %s:%s', a:file_name, a:line_number)
+func! s:get_breakpoint(file_name, line_number, condition)
+    let result = printf('b %s:%s', a:file_name, a:line_number)
+    if !empty(a:condition)
+        result = printf('%s, %s', result, a:condition)
+    endif
+    return result
 endfunc
 
 func s:docker_get_container_id()
@@ -65,16 +69,18 @@ func! s:docker_compose_run_get_id()
 endfunc
 
 " Commands
-func! s:get_breakpoint_cmd(file_name, line_number)
-    let breakpoint = s:get_breakpoint(a:file_name, a:line_number)
+func! s:get_breakpoint_cmd(file_path, line_number, condition)
+    let breakpoint = s:get_breakpoint(a:file_name, a:line_number, a:condition)
     return printf('-c "%s"', breakpoint)
 endfunc
 
 func! s:get_breakpoints_cmd()
     let results = []
-    for [file_name, line_numbers] in items(g:breakpoints_data)
-        for line_number in line_numbers
-            call add(results, s:get_breakpoint_cmd(file_name, line_number))
+    for [file_name, breakpoints] in items(g:breakpoints_data)
+        for breakpoint in breakpoints
+            call add(
+            \   results, s:get_breakpoint_cmd(breakpoint.file_path, breakpoint.line_number, breakpoint.condition)
+            \)
         endfor
     endfor
     call add(results, '-c "c"')
@@ -153,7 +159,7 @@ endfunc
 
 " Public functions
 func! pdb#debug#copy_breakpoint()
-    let @+ = s:get_breakpoint(pdb#common#get_current_file_path(), line('.'))
+    let @+ = s:get_breakpoint(pdb#common#get_current_file_path(), line('.'), '')
 endfunc
 
 func! pdb#debug#script()
