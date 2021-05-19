@@ -38,18 +38,14 @@ endfunc
 func! s:breakpoint_delete(file_path, line_number)
     let breakpoints = get(g:breakpoints_data, a:file_path)
     if !empty(breakpoints)
-        let breakpoint = get(
-        \   filter(
-        \       breakpoints, 
-        \       printf('v:val.line_number == %s', a:line_number)
-        \   ), 0
-        \)
-        if !empty(breakpoint)
-            call remove(breakpoints, index(breakpoints, breakpoint))
-            if len(breakpoints) == 0
-                call remove(g:breakpoints_data, a:file_path)
+        for breakpoint in breakpoints
+            if breakpoint.line_number == a:line_number
+                call remove(breakpoints, index(breakpoints, breakpoint))
+                if len(breakpoints) == 0
+                    call remove(g:breakpoints_data, a:file_path)
+                endif
             endif
-        endif
+        endfor
     endif
 endfunc
 
@@ -97,11 +93,8 @@ func! s:breakpoint_load_data()
 endfunc
 
 func! s:breakpoint_update_data(file_path)
-    let lines_count = line('$')
-    let signs = s:sign_get_placed(a:file_path)
     let breakpoint_ids = []
     let breakpoints = get(g:breakpoints_data, a:file_path, [])
-
     for breakpoint in breakpoints
         if empty(breakpoint.id)
             let breakpoint.id = s:sign_place(a:file_path, breakpoint.line_number)
@@ -109,25 +102,27 @@ func! s:breakpoint_update_data(file_path)
         call add(breakpoint_ids, breakpoint.id) 
     endfor
 
+    let lines_count = line('$')
+    let signs = s:sign_get_placed(a:file_path)
     for sign in signs
         if sign.lnum > lines_count || index(breakpoint_ids, sign.id) == -1
             call s:sign_unplace(sign.id, a:file_path)
         else
-            let breakpoint = filter(
-                breakpoints, 
-                printf('v:val.id == %s', sign.id)
-            )
-            let breakpoint.line_number = sign.lnum
+            for breakpoint in breakpoints
+                if breakpoint.id == sign.id
+                    let breakpoint.line_number = sign.lnum
+                endif
+            endfor
         endif
     endfor
 endfunc
 
 func! s:quickfix_update()
     let items = []
-    for [file_name, breakpoints] in items(g:breakpoints_data)
+    for [file_path, breakpoints] in items(g:breakpoints_data)
         for breakpoint in breakpoints
             let item = {
-            \   'filename': fnamemodify(file_name, ':p'),
+            \   'filename': fnamemodify(file_path, ':p'),
             \   'lnum': breakpoint.line_number,
             \   'text': breakpoint.condition,
             \   }
@@ -145,6 +140,11 @@ func! pdb#breakpoints#add(condition)
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
     call s:quickfix_update()
+endfunc
+
+func! pdb#breakpoints#add_conditional()
+    let condition = input("Condition: ")
+    call pdb#breakpoints#add(condition)
 endfunc
 
 func! pdb#breakpoints#delete()
@@ -180,12 +180,13 @@ func! pdb#breakpoints#init()
 endfunc
 
 func! pdb#breakpoints#buf_read()
-    let file_name = pdb#common#get_current_file_path()
+    let file_path = pdb#common#get_current_file_path()
     call s:breakpoint_update_data(file_path)
 endfunc
 
 func! pdb#breakpoints#buf_write()
-    let file_name = pdb#common#get_current_file_path()
+    let file_path = pdb#common#get_current_file_path()
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
+    call s:quickfix_update()
 endfunc

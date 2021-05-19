@@ -22,7 +22,7 @@ command! PdbDebugDockerDjangoScript call pdb#debug#docker_django_script()
 command! PdbDebugDockerDjangoServer call pdb#debug#docker_django_server()
 
 command! PdbBreakpointAdd call pdb#breakpoints#add('')
-command! -nargs=1 PdbBreakpointAddCondition call pdb#breakpoints#add(<f-args>)
+command! PdbBreakpointAddConditional call pdb#breakpoints#add_conditional()
 command! PdbBreakpointList call pdb#breakpoints#list()
 command! PdbBreakpointDelete call pdb#breakpoints#delete()
 command! PdbBreakpointDeleteInFile call pdb#breakpoints#delete_in_file()
