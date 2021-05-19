@@ -1,6 +1,8 @@
 let s:local_path = ''
 let s:remote_path = ''
-let [s:local_path, s:remote_path] = split(g:pdb_path_mapping, ':')
+if !empty(g:pdb_path_mapping)
+    let [s:local_path, s:remote_path] = split(g:pdb_path_mapping, ':')
+endif
 
 func! s:term_execute(cmd, split_cmd, buffer_name)
     if g:pdb_write_debug_log
