@@ -33,7 +33,7 @@ func! s:get_breakpoint(file_path, line_number, condition)
         let result = printf('%s, %s', result, a:condition)
     endif
     if !empty(s:local_path) && !empty(s:remote_path)
-        let result = substitute(result, printf('\V%s'), s:local_path), s:remote_path, '')
+        let result = substitute(result, printf('\V%s', s:local_path), s:remote_path, '')
     endif
     return result
 endfunc
