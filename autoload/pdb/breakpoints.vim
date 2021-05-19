@@ -3,7 +3,7 @@ let g:breakpoints_data = {}
 func! s:sign_place(file_path, line_number)
     return sign_place(
     \   0, 'Breakpoint', 'Breakpoint', a:file_path, 
-    \   {'lnum': a:line_number, 'priority': 1000}
+    \   {'lnum': a:line_number, 'priority': g:pdb_breakpoint_sign_priority}
     \)
 endfunc
 

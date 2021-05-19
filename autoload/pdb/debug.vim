@@ -1,3 +1,7 @@
+let s:local_path = ''
+let s:remote_path = ''
+let s:local_path, s:remote_path = split(g:pdb_path_mapping)
+
 func! s:term_execute(cmd, split_cmd, buffer_name)
     if g:pdb_write_debug_log
         echom a:cmd
@@ -27,6 +31,9 @@ func! s:get_breakpoint(file_name, line_number, condition)
     let result = printf('b %s:%s', a:file_name, a:line_number)
     if !empty(a:condition)
         result = printf('%s, %s', result, a:condition)
+    endif
+    if !empty(s:local_path) && !empty(s:remote_path)
+        let result = substitute(result, s:local_path, s:remote_path, '')
     endif
     return result
 endfunc
