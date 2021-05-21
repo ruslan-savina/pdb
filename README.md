@@ -9,6 +9,22 @@ Using vim-plug:
 
 `:PlugInstall`
 
+## breakpoints management
+
+`:PdbBreakpointAdd` Add breakpoint in a current line
+
+`:PdbBreakpointAddConditional` Add conditional breakpoint
+
+`:PdbBreakpointList` Show breakpoints list
+
+`:PdbBreakpointDelete` Delete breakpoint in a current line
+
+`:PdbBreakpointDeleteInFile` Delete all breakpoints in a current buffer
+
+`:PdbBreakpointDeleteAll` Delete all breakpoints
+
+`:PdbBreakpointCopy` Copy breakpint string
+
 ## commands
 `:PdbDebugScript` Debug current script
 
