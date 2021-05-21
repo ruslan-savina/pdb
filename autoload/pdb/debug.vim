@@ -142,20 +142,41 @@ func! s:get_django_server_cmd()
     return result
 endfunc
 
+func! s:get_docker_exec_cmd(...)
+    let options = printf(' %s', join(a:000, ' '))
+    return printf(
+    \   'docker exec%s %s', options, s:docker_compose_run_get_id()
+    \)
+endfunc
+
+func! s:get_docker_exec_interactive_tty_cmd()
+    return s:get_docker_exec_cmd('-it')
+endfunc
+
+func! Test()
+    echom s:get_docker_exec_interactive_tty_cmd()
+endfunc
+
 func! s:get_docker_script_cmd()
-    return printf('%s %s', s:get_docker_exec_it_cmd(), s:get_script_cmd())
+    return printf(
+    \   '%s %s', s:get_docker_exec_interactive_tty_cmd(), s:get_script_cmd()
+    \)
 endfunc
 
 func! s:get_docker_django_script_cmd()
-    return printf('%s %s', s:get_docker_exec_it_cmd(), s:get_django_script_cmd())
-endfunc
-
-func! s:get_docker_exec_it_cmd()
-    return printf('docker exec -it %s', s:docker_compose_run_get_id())
+    return printf(
+    \   '%s %s', 
+    \   s:get_docker_exec_interactive_tty_cmd(), 
+    \   s:get_django_script_cmd()
+    \)
 endfunc
 
 func! s:get_docker_django_server_cmd()
-    return printf('%s %s', s:get_docker_exec_it_cmd(), s:get_django_server_cmd())
+    return printf(
+    \   '%s %s', 
+    \   s:get_docker_exec_interactive_tty_cmd(), 
+    \   s:get_django_server_cmd()
+    \)
 endfunc
 
 func! s:get_django_kill_server_cmd()
@@ -163,7 +184,9 @@ func! s:get_django_kill_server_cmd()
 endfunc
 
 func! s:get_docker_django_kill_server_cmd()
-    return printf('%s %s', s:get_docker_exec_it_cmd(), s:get_django_kill_server_cmd())
+    return printf(
+    \   '%s %s', s:get_docker_exec_cmd(), s:get_django_kill_server_cmd()
+    \)
 endfunc
 
 " Public functions
