@@ -8,3 +8,16 @@ Using vim-plug:
 `Plug 'ruslan-savina/pdb'`
 
 `:PlugInstall`
+
+## commands
+`:PdbDebugScript` Debug current script
+
+`:PdbDebugDjangoScript` Debug current script using Django shell
+
+`:PdbDebugDjangoServer` Debug Django server
+
+`:PdbDebugDockerScript` Debug current script in Docker container
+
+`:PdbDebugDockerDjangoScript` Debug current script using Django shell in Docker container
+
+`:PdbDebugDockerDjangoServer` Debug Django server in Docker container
