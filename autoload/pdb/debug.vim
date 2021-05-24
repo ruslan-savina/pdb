@@ -153,10 +153,6 @@ func! s:get_docker_exec_interactive_tty_cmd()
     return s:get_docker_exec_cmd('-it')
 endfunc
 
-func! Test()
-    echom s:get_docker_exec_interactive_tty_cmd()
-endfunc
-
 func! s:get_docker_script_cmd()
     return printf(
     \   '%s %s', s:get_docker_exec_interactive_tty_cmd(), s:get_script_cmd()
