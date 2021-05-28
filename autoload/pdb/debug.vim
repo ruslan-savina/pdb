@@ -9,7 +9,8 @@ func! s:term_execute(cmd, split_cmd, buffer_name)
         echom a:cmd
     endif
     execute(a:split_cmd)
-    execute('term ' . a:cmd)
+    execute('enew')
+    call termopen(a:cmd)
     execute('file ' . g:pdb_module_name . ': ' . a:buffer_name . ' ' . bufnr())
     redraw
 endfunc
