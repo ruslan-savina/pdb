@@ -139,7 +139,6 @@ func! pdb#breakpoints#add(condition)
     call s:breakpoint_add(file_path, current_line, a:condition)
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
-    call s:quickfix_update()
 endfunc
 
 func! pdb#breakpoints#add_conditional()
@@ -152,7 +151,6 @@ func! pdb#breakpoints#delete()
     call s:breakpoint_delete(file_path, line('.'))
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
-    call s:quickfix_update()
 endfunc
 
 func! pdb#breakpoints#delete_in_file()
@@ -160,14 +158,12 @@ func! pdb#breakpoints#delete_in_file()
     call remove(g:breakpoints_data, file_path)
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
-    call s:quickfix_update()
 endfunc
 
 func! pdb#breakpoints#delete_all()
     let g:breakpoints_data = {}
     call sign_unplace('Breakpoint')
     call s:breakpoint_save_data()
-    call s:quickfix_update()
 endfunc
 
 func! pdb#breakpoints#list()
@@ -188,5 +184,4 @@ func! pdb#breakpoints#buf_write()
     let file_path = pdb#common#get_current_file_path()
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
-    call s:quickfix_update()
 endfunc
