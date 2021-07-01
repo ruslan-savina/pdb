@@ -44,13 +44,13 @@ endfunc
 func s:docker_get_container_id()
     let cmd = printf(
     \   'docker ps -q --filter name=%s', 
-    \   pdb#common#get_docker_container_name()
+    \   g:pdb_docker_container_name
     \)
     return s:system(cmd)
 endfunc
 
 func! s:docker_rm_contaner()
-    let cmd = printf('docker rm -f %s', pdb#common#get_docker_container_name())
+    let cmd = printf('docker rm -f %s', g:pdb_docker_container_name)
     call s:system(cmd)
 endfunc
 
@@ -59,7 +59,7 @@ func! s:docker_compose_run()
     \   '%s --file=%s run -d --service-ports --use-aliases --name=%s %s bash',
     \   g:pdb_docker_compose_cmd,
     \   g:pdb_docker_compose_file, 
-    \   pdb#common#get_docker_container_name(),
+    \   g:pdb_docker_container_name,
     \   g:pdb_docker_compose_service_name
     \)
     call s:system(cmd)
