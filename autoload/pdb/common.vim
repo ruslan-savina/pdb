@@ -7,5 +7,5 @@ func! pdb#common#get_docker_container_name()
 endfunc
 
 func! pdb#common#get_current_file_path()
-    return fnamemodify(expand("%"), ":~:.")
+    return fnamemodify(expand("%"), ":.")
 endfunc
