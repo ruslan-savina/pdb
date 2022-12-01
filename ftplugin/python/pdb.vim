@@ -1,6 +1,6 @@
+let g:pdb_base_cmd = get(g:, 'pdb_base_cmd', 'python -m pdb')
 let g:pdb_breakpoints_file_name = get(g:, 'pdb_breakpoints_file_name', '.breakpoints')
 let g:pdb_write_debug_log = get(g:, 'pdb_write_debug_log', v:false)
-let g:pdb_module_name = get(g:, 'pdb_module_name', 'pdb')
 let g:pdb_debug_script_split_cmd = get(g:, 'pdb_debug_script_split_cmd', 'vsp')
 let g:pdb_debug_django_server_split_cmd = get(g:, 'pdb_debug_django_server_split_cmd', 'tabnew')
 let g:pdb_path_mapping = get(g:, 'pdb_path_mapping', '')

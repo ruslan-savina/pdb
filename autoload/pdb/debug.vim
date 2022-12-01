@@ -11,7 +11,7 @@ func! s:term_execute(cmd, split_cmd, buffer_name)
     execute(a:split_cmd)
     execute('enew')
     call termopen(a:cmd)
-    execute('file ' . g:pdb_module_name . ': ' . a:buffer_name . ' ' . bufnr())
+    execute('file debug: ' . a:buffer_name . ' ' . bufnr())
     redraw
 endfunc
 
@@ -98,7 +98,7 @@ func! s:get_breakpoints_cmd()
 endfunc
 
 func! s:get_base_cmd()
-    return printf('python -m %s%s', g:pdb_module_name, s:get_breakpoints_cmd())
+    return printf('%s%s', g:pdb_base_cmd, s:get_breakpoints_cmd())
 endfunc
 
 func! s:get_django_settings_cmd()

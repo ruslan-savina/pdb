@@ -3,7 +3,7 @@ func! s:get_working_dirrectory_name()
 endfunc
 
 func! pdb#common#get_docker_container_name()
-    return printf('%s_%s', s:get_working_dirrectory_name(), g:pdb_module_name)
+    return printf('%s_debug', s:get_working_dirrectory_name())
 endfunc
 
 func! pdb#common#get_current_file_path()
