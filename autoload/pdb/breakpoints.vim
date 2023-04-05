@@ -1,4 +1,7 @@
 let g:breakpoints_data = {}
+let s:no_signs = v:true
+let s:prev_cur_lnum = v:null
+let s:signs = v:null
 
 func! s:sign_place(file_path, line_number)
     return sign_place(
@@ -13,8 +16,13 @@ func! s:sign_unplace(id, file_path)
     \)
 endfunc
 
-func! s:sign_get_placed(file_path)
-    return sign_getplaced(a:file_path, {'group': 'Breakpoint'})[0].signs
+func! s:sign_get_placed(file_path, ...)
+    let line_number = get(a:, 1, v:null)
+    let dict = {'group': 'Breakpoint'}
+    if !(line_number is v:null)
+        let dict.lnum = line_number
+    endif
+    return sign_getplaced(a:file_path, dict)[0].signs
 endfunc
 
 func! s:breakpoint_new(line_number, condition)
@@ -104,6 +112,7 @@ func! s:breakpoint_update_data(file_path)
 
     let lines_count = line('$')
     let signs = s:sign_get_placed(a:file_path)
+    let sign_ids = []
     for sign in signs
         if sign.lnum > lines_count || index(breakpoint_ids, sign.id) == -1
             call s:sign_unplace(sign.id, a:file_path)
@@ -113,8 +122,11 @@ func! s:breakpoint_update_data(file_path)
                     let breakpoint.line_number = sign.lnum
                 endif
             endfor
+            call add(sign_ids, sign.id)
         endif
     endfor
+
+    call filter(breakpoints, 'index(sign_ids, v:val.id) > -1')
 endfunc
 
 func! s:quickfix_update()
@@ -184,4 +196,44 @@ func! pdb#breakpoints#buf_write()
     let file_path = pdb#common#get_current_file_path()
     call s:breakpoint_update_data(file_path)
     call s:breakpoint_save_data()
+endfunc
+
+func! pdb#breakpoints#insert_enter()
+    let file_path = pdb#common#get_current_file_path()
+    let s:prev_cur_lnum = getpos(".")[1]
+    let s:signs = s:sign_get_placed(file_path, s:prev_cur_lnum)
+    if len(s:signs) > 0
+        let s:prev_cur_lnum = getpos(".")[1]
+        let s:no_signs = v:false
+    endif
+endfunc
+
+func! pdb#breakpoints#text_changed_i()
+    if s:no_signs
+        return
+    endif
+    let current_cur_lnum = getpos(".")[1]
+    if s:prev_cur_lnum > current_cur_lnum
+        let file_path = pdb#common#get_current_file_path()
+        for sign in s:signs
+            call s:sign_unplace(sign.id, file_path)
+        endfor
+        call pdb#breakpoints#insert_enter()
+    endif
+endfunc
+
+func! pdb#breakpoints#text_yank_post(event)
+    if a:event.operator == 'd'
+        let cursor_pos = getpos(".")[1] - 1
+        let lines_deleted =  len(a:event.regcontents)
+        let file_path = pdb#common#get_current_file_path()
+        let i = 1
+        while i <= lines_deleted
+            let s:signs = s:sign_get_placed(file_path, cursor_pos + i)
+            for sign in s:signs
+                call s:sign_unplace(sign.id, file_path)
+            endfor
+            let i += 1
+        endwhile
+    endif
 endfunc
