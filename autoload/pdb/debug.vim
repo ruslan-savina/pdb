@@ -42,27 +42,26 @@ func! s:get_breakpoint(file_path, line_number, condition)
 endfunc
 
 func s:docker_get_container_id()
+    if empty(g:pdb_docker_container_label)
+        return v:null
+    endif
     let cmd = printf(
-    \   'docker ps -q --filter name=%s', 
-    \   g:pdb_docker_container_name
+    \   'docker ps -q --filter label=%s', 
+    \   g:pdb_docker_container_label
     \)
     return s:system(cmd)
 endfunc
 
 func! s:docker_rm_contaner()
-    let cmd = printf('docker rm -f %s', g:pdb_docker_container_name)
-    call s:system(cmd)
+    let container_id = s:docker_get_container_id()
+    if !empty(container_id)
+        let cmd = printf('docker rm -f %s', container_id)
+        call s:system(cmd)
+    endif
 endfunc
 
 func! s:docker_compose_run()
-    let cmd = printf(
-    \   '%s --file=%s run -d --service-ports --use-aliases --name=%s %s bash',
-    \   g:pdb_docker_compose_cmd,
-    \   g:pdb_docker_compose_file, 
-    \   g:pdb_docker_container_name,
-    \   g:pdb_docker_compose_service_name
-    \)
-    call s:system(cmd)
+    call s:system(g:pdb_docker_compose_up_cmd)
 endfunc
 
 func! s:docker_compose_run_get_id()
