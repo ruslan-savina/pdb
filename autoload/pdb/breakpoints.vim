@@ -224,7 +224,7 @@ endfunc
 
 func! pdb#breakpoints#text_yank_post(event)
     if a:event.operator == 'd'
-        let cursor_pos = getpos(".")[1] - 1
+        let cursor_pos = getpos(".")[1]
         let lines_deleted =  len(a:event.regcontents)
         let file_path = pdb#common#get_current_file_path()
         let i = 1
